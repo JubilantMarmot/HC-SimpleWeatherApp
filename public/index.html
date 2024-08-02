@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Forecast</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        padding-top: 20px;
+      }
+      .card {
+        margin-bottom: 20px;
+      }
+      .weather-icon {
+        width: 50px;
+        height: 50px;
+      }
+      .modal-dialog {
+        max-width: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="modal fade"
+      id="latLongModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="latLongModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="latLongModalLabel">
+              Enter Latitude/Longitude
+            </h5>
+          </div>
+          <div class="modal-body">
+            <form id="latLongForm">
+              <div class="form-group">
+                <label for="latitudeInput">Latitude:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="latitudeInput"
+                  placeholder="Enter latitude"
+                  required
+                />
+                <p class="text-muted">
+                  Example: 37.7749 (San Francisco, CA)
+                </p>
+              </div>
+              <div class="form-group">
+                <label for="longitudeInput">Longitude:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="longitudeInput"
+                  placeholder="Enter longitude"
+                  required
+                />
+                <p class="text-muted">
+                  Example: -122.4194 (San Francisco, CA)
+                </p>
+              </div>
+              <button type="submit" class="btn btn-primary">Get Weather</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h1 class="text-center">Weather Forecast</h1>
+      <p>Welcome to my simple weather forecast page!</p>
+
+      <div id="weather-container" class="row"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      function fetchWeather(latitude, longitude) {
+        fetch(
+          `/weather?latitude=${encodeURIComponent(
+            latitude
+          )}&longitude=${encodeURIComponent(longitude)}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            displayWeather(data);
+            $("#latLongModal").modal("hide");
+          })
+          .catch((error) => {
+            alert("An error occurred while fetching weather data.");
+          });
+      }
+
+      function displayWeather(data) {
+        const container = document.getElementById("weather-container");
+        container.innerHTML = "";
+
+        data.forEach((item) => {
+          const card = document.createElement("div");
+          card.className = "col-md-6 col-lg-4";
+          card.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">${item.shortForecast}</h5>
+                        <img src="${item.icon}" alt="${
+            item.shortForecast
+          }" class="weather-icon">
+                        <p class="card-text">
+                            <strong>Temperature:</strong> ${item.temperature} ${
+            item.temperatureUnit
+          }<br>
+                            <strong>Humidity:</strong> ${
+                              item.relativeHumidity.value
+                            }%<br>
+                            <strong>Wind:</strong> ${item.windSpeed} ${
+            item.windDirection
+          }<br>
+                            <strong>Start Time:</strong> ${new Date(
+                              item.startTime
+                            ).toLocaleString()}<br>
+                            <strong>End Time:</strong> ${new Date(
+                              item.endTime
+                            ).toLocaleString()}
+                        </p>
+                    </div>
+                </div>
+            `;
+          container.appendChild(card);
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        $("#latLongModal").modal("show");
+
+        document
+          .getElementById("latLongForm")
+          .addEventListener("submit", (e) => {
+            e.preventDefault();
+            const latitude = document
+              .getElementById("latitudeInput")
+              .value.trim();
+            const longitude = document
+              .getElementById("longitudeInput")
+              .value.trim();
+            if (latitude && longitude) {
+              fetchWeather(latitude, longitude);
+            } else {
+              alert("Please enter both latitude and longitude.");
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

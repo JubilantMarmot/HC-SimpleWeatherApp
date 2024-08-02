@@ -1,3 +1,4 @@
+import staticPlugin from "@elysiajs/static";
 import Elysia, { t } from "elysia";
 
 const getWeather = async ({ latitude, longitude }: {
@@ -18,6 +19,9 @@ const getWeather = async ({ latitude, longitude }: {
 }
 
 new Elysia()
+  .use(staticPlugin({
+    prefix: '/'
+  }))
   .get(
     "/weather",
     async ({ query }) => {
